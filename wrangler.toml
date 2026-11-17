@@ -1,0 +1,31 @@
+name = "pylon-linear-sync"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Poll Pylon every 2 minutes (Pylon can't emit task webhooks, so outbound is polling).
+[triggers]
+crons = ["*/2 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pylon-linear-sync"
+database_id = "00000000-0000-0000-0000-000000000062"
+
+[vars]
+# Linear team that mirrored projects live in.
+LINEAR_TEAM_ID = "00000000-0000-0000-0000-000000000063"
+# Pylon PROJECT custom-field slug whose value = the paired Linear project id (empty/absent = don't sync).
+PYLON_SYNC_FIELD_SLUG = "linear_project_sync_id"
+# OAuth app "Pylon Sync" actor id — inbound webhooks from this actor are our own writes (drop them).
+LINEAR_APP_ACTOR_ID = "00000000-0000-0000-0000-000000000060"
+# Safety: "off" = never cancel anything (log only). "on" = cancel Linear issues whose Pylon task
+# was deleted — ONLY within synced projects (the deletion pass runs only inside syncProject()).
+DESTRUCTIVE_OPS = "off"
+WEBHOOK_PATH = "/webhooks/linear"
+
+# Secrets (set with `wrangler secret put <NAME>`), NOT stored here:
+#   PYLON_API_TOKEN         (write scope)
+#   LINEAR_CLIENT_ID
+#   LINEAR_CLIENT_SECRET
+#   LINEAR_WEBHOOK_SECRET   (from the Linear webhook you register post-deploy)
